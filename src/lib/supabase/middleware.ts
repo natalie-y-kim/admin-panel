@@ -16,7 +16,11 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet: Parameters<SetAllCookies>[0]) {
         cookiesToSet.forEach(({ name, value, options }) => {
-          request.cookies.set(name, value, options);
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          });
         });
 
         response = NextResponse.next({
