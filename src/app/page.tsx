@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import AdminLoginEntry from "@/components/AdminLoginEntry";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -7,9 +8,9 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
+  if (user) {
+    redirect("/admin");
   }
 
-  redirect("/admin");
+  return <AdminLoginEntry />;
 }
