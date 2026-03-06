@@ -15,30 +15,35 @@ export default function AdminLayout({
           <nav className="flex flex-wrap items-center gap-2 text-sm">
             <Link
               href="/admin"
+              prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
               Dashboard
             </Link>
             <Link
               href="/admin/users"
+              prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
               Users
             </Link>
             <Link
               href="/admin/images"
+              prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
               Images
             </Link>
             <Link
               href="/admin/captions"
+              prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
               Captions
             </Link>
             <Link
               href="/logout"
+              prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
               Logout
