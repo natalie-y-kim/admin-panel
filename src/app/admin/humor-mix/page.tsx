@@ -3,12 +3,34 @@ import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "../_lib/crud";
 
+type HumorMixRow = {
+  id: number;
+  created_datetime_utc: string;
+  humor_flavor_id: number;
+  caption_count: number;
+  humor_flavors: { slug: string | null } | { slug: string | null }[] | null;
+};
+
 type HumorMixPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
   }>;
 };
+
+function getHumorFlavorSlug(
+  relatedFlavor: { slug: string | null } | { slug: string | null }[] | null,
+) {
+  if (!relatedFlavor) {
+    return "-";
+  }
+
+  if (Array.isArray(relatedFlavor)) {
+    return relatedFlavor[0]?.slug ?? "-";
+  }
+
+  return relatedFlavor.slug ?? "-";
+}
 
 export default async function AdminHumorMixPage({
   searchParams,
@@ -73,29 +95,29 @@ export default async function AdminHumorMixPage({
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
             {humorMixRows && humorMixRows.length > 0 ? (
-              humorMixRows.map((row) => (
-                <tr key={row.id}>
-                  <td className="px-3 py-2 text-slate-700">{row.id}</td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {Array.isArray(row.humor_flavors)
-                      ? (row.humor_flavors[0]?.slug ?? "-")
-                      : (row.humor_flavors?.slug ?? "-")}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">{row.humor_flavor_id}</td>
-                  <td className="px-3 py-2 text-slate-700">{row.caption_count}</td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {formatDate(row.created_datetime_utc)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <Link
-                      href={`/admin/humor-mix/${row.id}/edit`}
-                      className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                    >
-                      Edit
-                    </Link>
-                  </td>
-                </tr>
-              ))
+              (humorMixRows as HumorMixRow[]).map((row) => {
+                const humorFlavorSlug = getHumorFlavorSlug(row.humor_flavors);
+
+                return (
+                  <tr key={row.id}>
+                    <td className="px-3 py-2 text-slate-700">{row.id}</td>
+                    <td className="px-3 py-2 text-slate-700">{humorFlavorSlug}</td>
+                    <td className="px-3 py-2 text-slate-700">{row.humor_flavor_id}</td>
+                    <td className="px-3 py-2 text-slate-700">{row.caption_count}</td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {formatDate(row.created_datetime_utc)}
+                    </td>
+                    <td className="px-3 py-2">
+                      <Link
+                        href={`/admin/humor-mix/${row.id}/edit`}
+                        className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                      >
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td
