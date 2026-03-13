@@ -4,12 +4,36 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "../_lib/crud";
 import { deleteLlmModelAction } from "./actions";
 
+type LlmModelRow = {
+  id: number;
+  name: string;
+  llm_provider_id: number;
+  provider_model_id: string;
+  is_temperature_supported: boolean;
+  created_datetime_utc: string;
+  llm_providers: { name: string | null } | { name: string | null }[] | null;
+};
+
 type LlmModelsPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
   }>;
 };
+
+function getProviderName(
+  relatedProvider: { name: string | null } | { name: string | null }[] | null,
+) {
+  if (!relatedProvider) {
+    return "-";
+  }
+
+  if (Array.isArray(relatedProvider)) {
+    return relatedProvider[0]?.name ?? "-";
+  }
+
+  return relatedProvider.name ?? "-";
+}
 
 export default async function AdminLlmModelsPage({
   searchParams,
@@ -82,54 +106,54 @@ export default async function AdminLlmModelsPage({
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
             {llmModels && llmModels.length > 0 ? (
-              llmModels.map((model) => (
-                <tr key={model.id}>
-                  <td className="px-3 py-2 text-slate-700">{model.name}</td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {Array.isArray(model.llm_providers)
-                      ? (model.llm_providers[0]?.name ?? "-")
-                      : (model.llm_providers?.name ?? "-")}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {model.provider_model_id}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {model.is_temperature_supported ? "Yes" : "No"}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {formatDate(model.created_datetime_utc)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/admin/llm-models/${model.id}/edit`}
-                        className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                      >
-                        Edit
-                      </Link>
-                      <details className="relative">
-                        <summary className="inline-flex cursor-pointer list-none rounded-md border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50">
-                          Delete
-                        </summary>
-                        <div className="absolute right-0 z-10 mt-2 w-56 rounded-md border border-slate-200 bg-white p-3 shadow-lg">
-                          <p className="text-xs text-slate-600">
-                            Confirm delete for this model?
-                          </p>
-                          <form action={deleteLlmModelAction} className="mt-2">
-                            <input type="hidden" name="id" value={model.id} />
-                            <button
-                              type="submit"
-                              className="w-full rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-500"
-                            >
-                              Confirm Delete
-                            </button>
-                          </form>
-                        </div>
-                      </details>
-                    </div>
-                  </td>
-                </tr>
-              ))
+              (llmModels as LlmModelRow[]).map((model) => {
+                const providerName = getProviderName(model.llm_providers);
+
+                return (
+                  <tr key={model.id}>
+                    <td className="px-3 py-2 text-slate-700">{model.name}</td>
+                    <td className="px-3 py-2 text-slate-700">{providerName}</td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {model.provider_model_id}
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {model.is_temperature_supported ? "Yes" : "No"}
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {formatDate(model.created_datetime_utc)}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/admin/llm-models/${model.id}/edit`}
+                          className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Edit
+                        </Link>
+                        <details className="relative">
+                          <summary className="inline-flex cursor-pointer list-none rounded-md border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50">
+                            Delete
+                          </summary>
+                          <div className="absolute right-0 z-10 mt-2 w-56 rounded-md border border-slate-200 bg-white p-3 shadow-lg">
+                            <p className="text-xs text-slate-600">
+                              Confirm delete for this model?
+                            </p>
+                            <form action={deleteLlmModelAction} className="mt-2">
+                              <input type="hidden" name="id" value={model.id} />
+                              <button
+                                type="submit"
+                                className="w-full rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-500"
+                              >
+                                Confirm Delete
+                              </button>
+                            </form>
+                          </div>
+                        </details>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td
