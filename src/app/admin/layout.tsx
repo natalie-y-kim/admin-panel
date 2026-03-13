@@ -35,13 +35,6 @@ export default function AdminLayout({
               Images
             </Link>
             <Link
-              href="/admin/captions"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Captions
-            </Link>
-            <Link
               href="/admin/humor-flavors"
               prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
@@ -56,25 +49,11 @@ export default function AdminLayout({
               Flavor Steps
             </Link>
             <Link
-              href="/admin/caption-requests"
+              href="/admin/humor-mix"
               prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
-              Caption Requests
-            </Link>
-            <Link
-              href="/admin/llm-prompt-chains"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Prompt Chains
-            </Link>
-            <Link
-              href="/admin/llm-responses"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              LLM Responses
+              Humor Mix
             </Link>
             <Link
               href="/admin/terms"
@@ -82,6 +61,20 @@ export default function AdminLayout({
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
               Terms
+            </Link>
+            <Link
+              href="/admin/captions"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Captions
+            </Link>
+            <Link
+              href="/admin/caption-requests"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Caption Requests
             </Link>
             <Link
               href="/admin/caption-examples"
@@ -103,6 +96,20 @@ export default function AdminLayout({
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
             >
               LLM Providers
+            </Link>
+            <Link
+              href="/admin/llm-prompt-chains"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Prompt Chains
+            </Link>
+            <Link
+              href="/admin/llm-responses"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              LLM Responses
             </Link>
             <Link
               href="/admin/allowed-signup-domains"
