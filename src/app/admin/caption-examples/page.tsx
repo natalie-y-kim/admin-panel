@@ -4,12 +4,37 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "../_lib/crud";
 import { deleteCaptionExampleAction } from "./actions";
 
+type CaptionExampleRow = {
+  id: number;
+  image_description: string;
+  caption: string;
+  explanation: string;
+  priority: number;
+  image_id: string | null;
+  created_datetime_utc: string;
+  images: { url: string | null } | { url: string | null }[] | null;
+};
+
 type CaptionExamplesPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
   }>;
 };
+
+function getImageUrl(
+  relatedImage: { url: string | null } | { url: string | null }[] | null,
+) {
+  if (!relatedImage) {
+    return "-";
+  }
+
+  if (Array.isArray(relatedImage)) {
+    return relatedImage[0]?.url ?? "-";
+  }
+
+  return relatedImage.url ?? "-";
+}
 
 export default async function AdminCaptionExamplesPage({
   searchParams,
@@ -88,57 +113,57 @@ export default async function AdminCaptionExamplesPage({
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
             {examples && examples.length > 0 ? (
-              examples.map((example) => (
-                <tr key={example.id}>
-                  <td className="max-w-sm px-3 py-2 text-slate-700">
-                    {example.image_description}
-                  </td>
-                  <td className="max-w-sm px-3 py-2 text-slate-700">
-                    {example.caption}
-                  </td>
-                  <td className="max-w-sm px-3 py-2 text-slate-700">
-                    {example.explanation}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">{example.priority}</td>
-                  <td className="max-w-xs px-3 py-2 text-slate-700">
-                    {Array.isArray(example.images)
-                      ? (example.images[0]?.url ?? "-")
-                      : (example.images?.url ?? "-")}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {formatDate(example.created_datetime_utc)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/admin/caption-examples/${example.id}/edit`}
-                        className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                      >
-                        Edit
-                      </Link>
-                      <details className="relative">
-                        <summary className="inline-flex cursor-pointer list-none rounded-md border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50">
-                          Delete
-                        </summary>
-                        <div className="absolute right-0 z-10 mt-2 w-56 rounded-md border border-slate-200 bg-white p-3 shadow-lg">
-                          <p className="text-xs text-slate-600">
-                            Confirm delete for this example?
-                          </p>
-                          <form action={deleteCaptionExampleAction} className="mt-2">
-                            <input type="hidden" name="id" value={example.id} />
-                            <button
-                              type="submit"
-                              className="w-full rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-500"
-                            >
-                              Confirm Delete
-                            </button>
-                          </form>
-                        </div>
-                      </details>
-                    </div>
-                  </td>
-                </tr>
-              ))
+              (examples as CaptionExampleRow[]).map((example) => {
+                const imageUrl = getImageUrl(example.images);
+
+                return (
+                  <tr key={example.id}>
+                    <td className="max-w-sm px-3 py-2 text-slate-700">
+                      {example.image_description}
+                    </td>
+                    <td className="max-w-sm px-3 py-2 text-slate-700">
+                      {example.caption}
+                    </td>
+                    <td className="max-w-sm px-3 py-2 text-slate-700">
+                      {example.explanation}
+                    </td>
+                    <td className="px-3 py-2 text-slate-700">{example.priority}</td>
+                    <td className="max-w-xs px-3 py-2 text-slate-700">{imageUrl}</td>
+                    <td className="px-3 py-2 text-slate-700">
+                      {formatDate(example.created_datetime_utc)}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/admin/caption-examples/${example.id}/edit`}
+                          className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Edit
+                        </Link>
+                        <details className="relative">
+                          <summary className="inline-flex cursor-pointer list-none rounded-md border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50">
+                            Delete
+                          </summary>
+                          <div className="absolute right-0 z-10 mt-2 w-56 rounded-md border border-slate-200 bg-white p-3 shadow-lg">
+                            <p className="text-xs text-slate-600">
+                              Confirm delete for this example?
+                            </p>
+                            <form action={deleteCaptionExampleAction} className="mt-2">
+                              <input type="hidden" name="id" value={example.id} />
+                              <button
+                                type="submit"
+                                className="w-full rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-500"
+                              >
+                                Confirm Delete
+                              </button>
+                            </form>
+                          </div>
+                        </details>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td
