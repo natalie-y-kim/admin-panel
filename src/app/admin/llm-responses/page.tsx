@@ -84,69 +84,87 @@ export default async function AdminLlmResponsesPage() {
                 Time (s)
               </th>
               <th className="px-3 py-2 text-left font-medium text-slate-700">
-                Response
-              </th>
-              <th className="px-3 py-2 text-left font-medium text-slate-700">
-                System Prompt
-              </th>
-              <th className="px-3 py-2 text-left font-medium text-slate-700">
-                User Prompt
-              </th>
-              <th className="px-3 py-2 text-left font-medium text-slate-700">
                 Created (UTC)
+              </th>
+              <th className="px-3 py-2 text-left font-medium text-slate-700">
+                Details
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
             {responses && responses.length > 0 ? (
               responses.map((response) => (
-                <tr key={response.id}>
-                  <td className="px-3 py-2 font-mono text-xs text-slate-700">
-                    {response.id}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {getLookupValue(response.llm_models as LlmLookup, "name")}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {getLookupValue(response.profiles as LlmLookup, "email")}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {getLookupValue(response.humor_flavors as LlmLookup, "slug")}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {response.caption_request_id}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {response.llm_prompt_chain_id ?? "-"}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {response.humor_flavor_step_id ?? "-"}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {response.llm_temperature ?? "-"}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {response.processing_time_seconds}
-                  </td>
-                  <td className="max-w-sm px-3 py-2 text-slate-700">
-                    {response.llm_model_response ?? "-"}
-                  </td>
-                  <td className="max-w-sm px-3 py-2 text-slate-700">
-                    {response.llm_system_prompt}
-                  </td>
-                  <td className="max-w-sm px-3 py-2 text-slate-700">
-                    {response.llm_user_prompt}
-                  </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {formatDate(response.created_datetime_utc)}
-                  </td>
-                </tr>
-              ))
+                  <tr key={response.id}>
+                    <td className="px-2 py-1 align-top font-mono text-xs text-slate-700">
+                      {response.id}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {getLookupValue(response.llm_models as LlmLookup, "name")}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {getLookupValue(response.profiles as LlmLookup, "email")}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {getLookupValue(response.humor_flavors as LlmLookup, "slug")}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {response.caption_request_id}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {response.llm_prompt_chain_id ?? "-"}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {response.humor_flavor_step_id ?? "-"}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {response.llm_temperature ?? "-"}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {response.processing_time_seconds}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      {formatDate(response.created_datetime_utc)}
+                    </td>
+                    <td className="px-2 py-1 align-top text-slate-700">
+                      <details className="min-w-32">
+                        <summary className="cursor-pointer list-none rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50">
+                          View
+                        </summary>
+                        <div className="mt-2 w-[32rem] max-w-[70vw] space-y-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              LLM Response
+                            </p>
+                            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-700">
+                              {response.llm_model_response ?? "-"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              System Prompt
+                            </p>
+                            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-700">
+                              {response.llm_system_prompt}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              User Prompt
+                            </p>
+                            <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-700">
+                              {response.llm_user_prompt}
+                            </p>
+                          </div>
+                        </div>
+                      </details>
+                    </td>
+                  </tr>
+                ))
             ) : (
               <tr>
                 <td
                   className="px-3 py-6 text-center text-slate-500"
-                  colSpan={13}
+                  colSpan={11}
                 >
                   {error
                     ? "Unable to display LLM responses."
