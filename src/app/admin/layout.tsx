@@ -77,6 +77,48 @@ export default function AdminLayout({
               LLM Responses
             </Link>
             <Link
+              href="/admin/terms"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Terms
+            </Link>
+            <Link
+              href="/admin/caption-examples"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Caption Examples
+            </Link>
+            <Link
+              href="/admin/llm-models"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              LLM Models
+            </Link>
+            <Link
+              href="/admin/llm-providers"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              LLM Providers
+            </Link>
+            <Link
+              href="/admin/allowed-signup-domains"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Signup Domains
+            </Link>
+            <Link
+              href="/admin/whitelist-email-addresses"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Email Whitelist
+            </Link>
+            <Link
               href="/logout"
               prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
