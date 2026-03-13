@@ -42,6 +42,41 @@ export default function AdminLayout({
               Captions
             </Link>
             <Link
+              href="/admin/humor-flavors"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Humor Flavors
+            </Link>
+            <Link
+              href="/admin/humor-flavor-steps"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Flavor Steps
+            </Link>
+            <Link
+              href="/admin/caption-requests"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Caption Requests
+            </Link>
+            <Link
+              href="/admin/llm-prompt-chains"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              Prompt Chains
+            </Link>
+            <Link
+              href="/admin/llm-responses"
+              prefetch={false}
+              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
+            >
+              LLM Responses
+            </Link>
+            <Link
               href="/logout"
               prefetch={false}
               className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
