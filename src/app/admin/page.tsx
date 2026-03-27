@@ -89,7 +89,9 @@ export default async function AdminDashboardPage() {
     supabase.from("captions").select("image_id, images(url)"),
     supabase
       .from("captions")
-      .select("profile_id, profiles(email, first_name, last_name)"),
+      .select(
+        "profile_id, profiles!captions_profile_id_fkey(email, first_name, last_name)",
+      ),
   ]);
 
   const topCaptions: TopCaptionRow[] = (topCaptionsData ?? []).map(

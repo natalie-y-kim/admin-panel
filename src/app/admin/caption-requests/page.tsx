@@ -33,7 +33,9 @@ export default async function AdminCaptionRequestsPage() {
 
   const { data: captionRequests, error } = await supabase
     .from("caption_requests")
-    .select("id, created_datetime_utc, profile_id, image_id, profiles(email), images(url)")
+    .select(
+      "id, created_datetime_utc, profile_id, image_id, profiles!caption_requests_profile_id_fkey(email), images(url)",
+    )
     .order("created_datetime_utc", { ascending: false });
 
   return (

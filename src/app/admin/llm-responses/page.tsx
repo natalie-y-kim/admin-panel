@@ -37,7 +37,7 @@ export default async function AdminLlmResponsesPage() {
   const { data: responses, error } = await supabase
     .from("llm_model_responses")
     .select(
-      "id, created_datetime_utc, llm_model_response, processing_time_seconds, llm_model_id, profile_id, caption_request_id, llm_system_prompt, llm_user_prompt, llm_temperature, humor_flavor_id, llm_prompt_chain_id, humor_flavor_step_id, llm_models(name), profiles(email), humor_flavors(slug)",
+      "id, created_datetime_utc, llm_model_response, processing_time_seconds, llm_model_id, profile_id, caption_request_id, llm_system_prompt, llm_user_prompt, llm_temperature, humor_flavor_id, llm_prompt_chain_id, humor_flavor_step_id, llm_models(name), profiles!llm_model_responses_profile_id_fkey(email), humor_flavors(slug)",
     )
     .order("created_datetime_utc", { ascending: false });
 
