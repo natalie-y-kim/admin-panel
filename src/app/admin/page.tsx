@@ -140,7 +140,7 @@ function MetricCard({
     <Link
       href={href}
       prefetch={false}
-      className="rounded-xl bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="rounded-xl border border-purple-100 bg-white p-5 shadow-md shadow-purple-950/5 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-lg hover:shadow-purple-950/10 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20 dark:hover:border-purple-500/60 dark:hover:shadow-black/30 dark:focus:ring-offset-slate-950"
     >
       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
         {label}
@@ -291,7 +291,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="w-full rounded-xl bg-white p-8 shadow-sm">
+      <section className="w-full rounded-xl border border-purple-100 bg-white p-8 shadow-md shadow-purple-950/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20">
         <h1 className="text-3xl font-semibold text-slate-900">Dashboard</h1>
         <p className="mt-3 text-sm text-slate-600">
           Signed in as <span className="font-medium">{user.email}</span>.
@@ -385,7 +385,7 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm">
+      <section className="rounded-xl border border-purple-100 bg-white p-6 shadow-md shadow-purple-950/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">
@@ -411,7 +411,7 @@ export default async function AdminDashboardPage() {
         ) : null}
 
         <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <article className="rounded-lg border border-slate-200 p-4">
+          <article className="rounded-lg border border-purple-100 bg-purple-50/40 p-4 dark:border-slate-700 dark:bg-slate-800/70">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Responses Today
             </p>
@@ -419,7 +419,7 @@ export default async function AdminDashboardPage() {
               {formatCount(llmResponsesTodayCount)}
             </p>
           </article>
-          <article className="rounded-lg border border-slate-200 p-4">
+          <article className="rounded-lg border border-purple-100 bg-purple-50/40 p-4 dark:border-slate-700 dark:bg-slate-800/70">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Average Time Today
             </p>
@@ -429,7 +429,7 @@ export default async function AdminDashboardPage() {
                 : `${averageProcessingTime.toFixed(1)}s`}
             </p>
           </article>
-          <article className="rounded-lg border border-slate-200 p-4">
+          <article className="rounded-lg border border-purple-100 bg-purple-50/40 p-4 dark:border-slate-700 dark:bg-slate-800/70">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Slowest Recent
             </p>
@@ -439,7 +439,7 @@ export default async function AdminDashboardPage() {
           </article>
         </div>
 
-        <div className="mt-5 overflow-x-auto">
+        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:shadow-black/20">
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-slate-50">
               <tr>
@@ -457,7 +457,7 @@ export default async function AdminDashboardPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-200 bg-white">
               {slowLlmResponses.length > 0 ? (
                 slowLlmResponses.map((response) => (
                   <tr key={response.id}>
@@ -490,7 +490,7 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-xl bg-white p-6 shadow-sm">
+      <section className="rounded-xl border border-purple-100 bg-white p-6 shadow-md shadow-purple-950/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">
@@ -515,7 +515,7 @@ export default async function AdminDashboardPage() {
           </p>
         ) : null}
 
-        <div className="mt-5 overflow-x-auto">
+        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:shadow-black/20">
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-slate-50">
               <tr>
@@ -536,7 +536,7 @@ export default async function AdminDashboardPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-200 bg-white">
               {mostVotedCaptions.length > 0 ? (
                 mostVotedCaptions.map((caption) => {
                   const imageUrl = getRelatedValue(caption.images, "url");
@@ -595,7 +595,7 @@ export default async function AdminDashboardPage() {
       ) : null}
 
       <section className="grid gap-6 xl:grid-cols-2">
-        <article className="rounded-xl bg-white p-6 shadow-sm">
+        <article className="rounded-xl border border-purple-100 bg-white p-6 shadow-md shadow-purple-950/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20">
           <h2 className="text-lg font-semibold text-slate-900">Latest Users</h2>
           <div className="mt-4 divide-y divide-slate-200">
             {recentUsers.length > 0 ? (
@@ -621,9 +621,9 @@ export default async function AdminDashboardPage() {
           </div>
         </article>
 
-        <article className="rounded-xl bg-white p-6 shadow-sm">
+        <article className="rounded-xl border border-purple-100 bg-white p-6 shadow-md shadow-purple-950/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20">
           <h2 className="text-lg font-semibold text-slate-900">Latest Images</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm font-medium text-purple-700">
             Click an image to view it larger.
           </p>
           <div className="mt-4 divide-y divide-slate-200">
@@ -661,7 +661,7 @@ export default async function AdminDashboardPage() {
           </div>
         </article>
 
-        <article className="rounded-xl bg-white p-6 shadow-sm">
+        <article className="rounded-xl border border-purple-100 bg-white p-6 shadow-md shadow-purple-950/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20">
           <h2 className="text-lg font-semibold text-slate-900">
             Latest Caption Requests
           </h2>
@@ -692,7 +692,7 @@ export default async function AdminDashboardPage() {
           </div>
         </article>
 
-        <article className="rounded-xl bg-white p-6 shadow-sm">
+        <article className="rounded-xl border border-purple-100 bg-white p-6 shadow-md shadow-purple-950/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/20">
           <h2 className="text-lg font-semibold text-slate-900">
             Latest LLM Responses
           </h2>

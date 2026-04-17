@@ -36,7 +36,7 @@ export function ImagePreviewButton({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="shrink-0 rounded focus:outline-none focus:ring-2 focus:ring-slate-400"
+        className="shrink-0 rounded focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
         aria-label="View larger image"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -62,7 +62,7 @@ export function ImagePreviewButton({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="absolute right-3 top-3 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-100"
+              className="absolute right-3 top-3 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
             >
               X
             </button>

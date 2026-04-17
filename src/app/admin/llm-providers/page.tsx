@@ -37,7 +37,7 @@ export default async function AdminLlmProvidersPage({
         </div>
         <Link
           href="/admin/llm-providers/new"
-          className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+          className="inline-flex rounded-md bg-purple-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
         >
           New Provider
         </Link>
