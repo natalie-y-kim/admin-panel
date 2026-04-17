@@ -1,5 +1,24 @@
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
+import {
+  getBooleanParam,
+  getLikePattern,
+  getStringParam,
+  hasAdminFilters,
+} from "../_lib/filters";
+import { getAdminPagination } from "../_lib/pagination";
+
+type CaptionsPageProps = {
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    public?: string;
+    featured?: string;
+    profileId?: string;
+    imageId?: string;
+  }>;
+};
 
 type CaptionWithImage = {
   id: string;
@@ -35,16 +54,56 @@ function getImageUrl(
   return relatedImage.url;
 }
 
-export default async function AdminCaptionsPage() {
+export default async function AdminCaptionsPage({
+  searchParams,
+}: CaptionsPageProps) {
   await requireSuperadmin();
+  const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
+  const searchQuery = getStringParam(params, "q");
+  const publicFilter = getBooleanParam(params, "public");
+  const featuredFilter = getBooleanParam(params, "featured");
+  const profileId = getStringParam(params, "profileId");
+  const imageId = getStringParam(params, "imageId");
+  const hasFilters = hasAdminFilters(params, [
+    "q",
+    "public",
+    "featured",
+    "profileId",
+    "imageId",
+  ]);
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  let captionsQuery = supabase
     .from("captions")
     .select(
       "id, content, profile_id, image_id, like_count, is_public, is_featured, created_datetime_utc, images(url)",
-    )
-    .order("created_datetime_utc", { ascending: false });
+      { count: "exact" },
+    );
+
+  if (searchQuery) {
+    captionsQuery = captionsQuery.ilike("content", getLikePattern(searchQuery));
+  }
+
+  if (publicFilter !== null) {
+    captionsQuery = captionsQuery.eq("is_public", publicFilter);
+  }
+
+  if (featuredFilter !== null) {
+    captionsQuery = captionsQuery.eq("is_featured", featuredFilter);
+  }
+
+  if (profileId) {
+    captionsQuery = captionsQuery.eq("profile_id", profileId);
+  }
+
+  if (imageId) {
+    captionsQuery = captionsQuery.eq("image_id", imageId);
+  }
+
+  const { data, error, count } = await captionsQuery
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   const captions: CaptionWithImage[] = (data ?? []).map((row) => ({
     id: row.id as string,
@@ -65,6 +124,77 @@ export default async function AdminCaptionsPage() {
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
       <h1 className="text-2xl font-semibold text-slate-900">Captions</h1>
       <p className="mt-2 text-sm text-slate-600">Read-only captions list.</p>
+
+      <form className="mt-5 grid gap-3 rounded-md border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_9rem_9rem_minmax(0,1fr)_minmax(0,1fr)_auto_auto]">
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Search</span>
+          <input
+            type="search"
+            name="q"
+            defaultValue={searchQuery}
+            placeholder="Caption text"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Public</span>
+          <select
+            name="public"
+            defaultValue={getStringParam(params, "public")}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Featured</span>
+          <select
+            name="featured"
+            defaultValue={getStringParam(params, "featured")}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Profile ID</span>
+          <input
+            type="search"
+            name="profileId"
+            defaultValue={profileId}
+            placeholder="Exact UUID"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Image ID</span>
+          <input
+            type="search"
+            name="imageId"
+            defaultValue={imageId}
+            placeholder="Exact UUID"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </label>
+        <button
+          type="submit"
+          className="self-end rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+        >
+          Apply
+        </button>
+        {hasFilters ? (
+          <a
+            href="/admin/captions"
+            className="self-end rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-white"
+          >
+            Clear
+          </a>
+        ) : null}
+      </form>
 
       {error ? (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -151,13 +281,25 @@ export default async function AdminCaptionsPage() {
                   className="px-3 py-6 text-center text-slate-500"
                   colSpan={8}
                 >
-                  {error ? "Unable to display captions." : "No captions found."}
+                  {error
+                    ? "Unable to display captions."
+                    : hasFilters
+                      ? "No captions match these filters."
+                      : "No captions found."}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/captions"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="captions"
+      />
     </section>
   );
 }

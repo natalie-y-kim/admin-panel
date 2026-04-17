@@ -1,5 +1,13 @@
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
+import { getAdminPagination } from "../_lib/pagination";
+
+type CaptionRequestsPageProps = {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+};
 
 type RelatedRecord = { email?: string | null; url?: string | null } | { email?: string | null; url?: string | null }[] | null;
 
@@ -27,16 +35,22 @@ function getRelatedValue(value: RelatedRecord, key: "email" | "url") {
   return value[key] ?? "-";
 }
 
-export default async function AdminCaptionRequestsPage() {
+export default async function AdminCaptionRequestsPage({
+  searchParams,
+}: CaptionRequestsPageProps) {
   await requireSuperadmin();
+  const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: captionRequests, error } = await supabase
+  const { data: captionRequests, error, count } = await supabase
     .from("caption_requests")
     .select(
       "id, created_datetime_utc, profile_id, image_id, profiles!caption_requests_profile_id_fkey(email), images(url)",
+      { count: "exact" },
     )
-    .order("created_datetime_utc", { ascending: false });
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -110,6 +124,14 @@ export default async function AdminCaptionRequestsPage() {
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/caption-requests"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="caption requests"
+      />
     </section>
   );
 }

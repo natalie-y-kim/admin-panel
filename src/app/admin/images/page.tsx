@@ -1,12 +1,24 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
+import {
+  getBooleanParam,
+  getLikePattern,
+  getStringParam,
+  hasAdminFilters,
+} from "../_lib/filters";
+import { getAdminPagination } from "../_lib/pagination";
 import { deleteImageAction } from "./actions";
 
 type AdminImagesPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
+    page?: string;
+    q?: string;
+    public?: string;
+    profileId?: string;
   }>;
 };
 
@@ -23,12 +35,37 @@ export default async function AdminImagesPage({
 }: AdminImagesPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
+  const searchQuery = getStringParam(params, "q");
+  const publicFilter = getBooleanParam(params, "public");
+  const profileId = getStringParam(params, "profileId");
+  const hasFilters = hasAdminFilters(params, ["q", "public", "profileId"]);
   const supabase = await createClient();
 
-  const { data: images, error } = await supabase
+  let imagesQuery = supabase
     .from("images")
-    .select("id, url, image_description, is_public, profile_id, created_datetime_utc")
-    .order("created_datetime_utc", { ascending: false });
+    .select("id, url, image_description, is_public, profile_id, created_datetime_utc", {
+      count: "exact",
+    });
+
+  if (searchQuery) {
+    const likePattern = getLikePattern(searchQuery);
+    imagesQuery = imagesQuery.or(
+      `image_description.ilike.${likePattern},url.ilike.${likePattern}`,
+    );
+  }
+
+  if (publicFilter !== null) {
+    imagesQuery = imagesQuery.eq("is_public", publicFilter);
+  }
+
+  if (profileId) {
+    imagesQuery = imagesQuery.eq("profile_id", profileId);
+  }
+
+  const { data: images, error, count } = await imagesQuery
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -56,6 +93,55 @@ export default async function AdminImagesPage({
           {params.error}
         </p>
       ) : null}
+
+      <form className="mt-5 grid gap-3 rounded-md border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[minmax(0,1fr)_10rem_minmax(0,1fr)_auto_auto]">
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Search</span>
+          <input
+            type="search"
+            name="q"
+            defaultValue={searchQuery}
+            placeholder="Description or URL"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Public</span>
+          <select
+            name="public"
+            defaultValue={getStringParam(params, "public")}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">Any</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+        <label className="text-sm text-slate-700">
+          <span className="font-medium">Profile ID</span>
+          <input
+            type="search"
+            name="profileId"
+            defaultValue={profileId}
+            placeholder="Exact UUID"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </label>
+        <button
+          type="submit"
+          className="self-end rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+        >
+          Apply
+        </button>
+        {hasFilters ? (
+          <a
+            href="/admin/images"
+            className="self-end rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-white"
+          >
+            Clear
+          </a>
+        ) : null}
+      </form>
 
       {error ? (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -152,13 +238,25 @@ export default async function AdminImagesPage({
                   className="px-3 py-6 text-center text-slate-500"
                   colSpan={6}
                 >
-                  {error ? "Unable to display images." : "No images found."}
+                  {error
+                    ? "Unable to display images."
+                    : hasFilters
+                      ? "No images match these filters."
+                      : "No images found."}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/images"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="images"
+      />
     </section>
   );
 }

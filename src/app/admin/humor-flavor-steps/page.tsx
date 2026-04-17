@@ -1,5 +1,13 @@
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
+import { getAdminPagination } from "../_lib/pagination";
+
+type HumorFlavorStepsPageProps = {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+};
 
 type StepLookup =
   | { slug?: string | null; name?: string | null }
@@ -30,17 +38,23 @@ function getLookupValue(value: StepLookup, key: "slug" | "name") {
   return value[key] ?? "-";
 }
 
-export default async function AdminHumorFlavorStepsPage() {
+export default async function AdminHumorFlavorStepsPage({
+  searchParams,
+}: HumorFlavorStepsPageProps) {
   await requireSuperadmin();
+  const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: steps, error } = await supabase
+  const { data: steps, error, count } = await supabase
     .from("humor_flavor_steps")
     .select(
       "id, created_datetime_utc, humor_flavor_id, llm_temperature, order_by, llm_input_type_id, llm_output_type_id, llm_model_id, humor_flavor_step_type_id, llm_system_prompt, llm_user_prompt, description, humor_flavors(slug), llm_input_types(slug), llm_output_types(slug), llm_models(name), humor_flavor_step_types(slug)",
+      { count: "exact" },
     )
     .order("humor_flavor_id", { ascending: true })
-    .order("order_by", { ascending: true });
+    .order("order_by", { ascending: true })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -151,6 +165,14 @@ export default async function AdminHumorFlavorStepsPage() {
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/humor-flavor-steps"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="flavor steps"
+      />
     </section>
   );
 }

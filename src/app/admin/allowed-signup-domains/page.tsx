@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
 import { formatDate } from "../_lib/crud";
+import { getAdminPagination } from "../_lib/pagination";
 import { deleteAllowedSignupDomainAction } from "./actions";
 
 type AllowedSignupDomainsPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
+    page?: string;
   }>;
 };
 
@@ -16,12 +19,14 @@ export default async function AdminAllowedSignupDomainsPage({
 }: AllowedSignupDomainsPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: domains, error } = await supabase
+  const { data: domains, error, count } = await supabase
     .from("allowed_signup_domains")
-    .select("id, apex_domain, created_datetime_utc")
-    .order("created_datetime_utc", { ascending: false });
+    .select("id, apex_domain, created_datetime_utc", { count: "exact" })
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -125,6 +130,14 @@ export default async function AdminAllowedSignupDomainsPage({
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/allowed-signup-domains"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="signup domains"
+      />
     </section>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminSidebar } from "./_components/AdminSidebar";
 
 export default function AdminLayout({
   children,
@@ -8,134 +9,21 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-slate-100">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 py-4 sm:px-6">
-          <p className="mr-2 text-sm font-semibold text-slate-800">
-            Humor Admin
-          </p>
-          <nav className="flex flex-wrap items-center gap-2 text-sm">
-            <Link
-              href="/admin"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/admin/users"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Users
-            </Link>
-            <Link
-              href="/admin/images"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Images
-            </Link>
-            <Link
-              href="/admin/humor-flavors"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Humor Flavors
-            </Link>
-            <Link
-              href="/admin/humor-flavor-steps"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Flavor Steps
-            </Link>
-            <Link
-              href="/admin/humor-mix"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Humor Mix
-            </Link>
-            <Link
-              href="/admin/terms"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Terms
-            </Link>
-            <Link
-              href="/admin/captions"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Captions
-            </Link>
-            <Link
-              href="/admin/caption-requests"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Caption Requests
-            </Link>
-            <Link
-              href="/admin/caption-examples"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Caption Examples
-            </Link>
-            <Link
-              href="/admin/llm-models"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              LLM Models
-            </Link>
-            <Link
-              href="/admin/llm-providers"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              LLM Providers
-            </Link>
-            <Link
-              href="/admin/llm-prompt-chains"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Prompt Chains
-            </Link>
-            <Link
-              href="/admin/llm-responses"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              LLM Responses
-            </Link>
-            <Link
-              href="/admin/allowed-signup-domains"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Signup Domains
-            </Link>
-            <Link
-              href="/admin/whitelist-email-addresses"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Email Whitelist
-            </Link>
-            <Link
-              href="/logout"
-              prefetch={false}
-              className="rounded-md px-3 py-1.5 text-slate-700 transition hover:bg-slate-100"
-            >
-              Logout
-            </Link>
-          </nav>
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+          <p className="text-sm font-semibold text-slate-800">Humor Admin</p>
+          <Link
+            href="/logout"
+            prefetch={false}
+            className="rounded-md px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100"
+          >
+            Logout
+          </Link>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:items-start">
+        <AdminSidebar />
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
     </div>
   );
 }

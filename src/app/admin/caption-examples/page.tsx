@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
 import { formatDate } from "../_lib/crud";
+import { getAdminPagination } from "../_lib/pagination";
 import { deleteCaptionExampleAction } from "./actions";
 
 type CaptionExampleRow = {
@@ -19,6 +21,7 @@ type CaptionExamplesPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
+    page?: string;
   }>;
 };
 
@@ -41,15 +44,18 @@ export default async function AdminCaptionExamplesPage({
 }: CaptionExamplesPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: examples, error } = await supabase
+  const { data: examples, error, count } = await supabase
     .from("caption_examples")
     .select(
       "id, image_description, caption, explanation, priority, image_id, created_datetime_utc, images(url)",
+      { count: "exact" },
     )
     .order("priority", { ascending: false })
-    .order("created_datetime_utc", { ascending: false });
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -179,6 +185,14 @@ export default async function AdminCaptionExamplesPage({
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/caption-examples"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="caption examples"
+      />
     </section>
   );
 }

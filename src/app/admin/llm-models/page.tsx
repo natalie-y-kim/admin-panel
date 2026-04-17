@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
 import { formatDate } from "../_lib/crud";
+import { getAdminPagination } from "../_lib/pagination";
 import { deleteLlmModelAction } from "./actions";
 
 type LlmModelRow = {
@@ -18,6 +20,7 @@ type LlmModelsPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
+    page?: string;
   }>;
 };
 
@@ -40,14 +43,17 @@ export default async function AdminLlmModelsPage({
 }: LlmModelsPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: llmModels, error } = await supabase
+  const { data: llmModels, error, count } = await supabase
     .from("llm_models")
     .select(
       "id, name, llm_provider_id, provider_model_id, is_temperature_supported, created_datetime_utc, llm_providers(name)",
+      { count: "exact" },
     )
-    .order("created_datetime_utc", { ascending: false });
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -167,6 +173,14 @@ export default async function AdminLlmModelsPage({
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/llm-models"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="LLM models"
+      />
     </section>
   );
 }

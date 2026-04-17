@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
 import { formatDate } from "../_lib/crud";
+import { getAdminPagination } from "../_lib/pagination";
 import { deleteTermAction } from "./actions";
 
 type TermRow = {
@@ -19,6 +21,7 @@ type TermsPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
+    page?: string;
   }>;
 };
 
@@ -39,15 +42,18 @@ function getTermTypeName(
 export default async function AdminTermsPage({ searchParams }: TermsPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: terms, error } = await supabase
+  const { data: terms, error, count } = await supabase
     .from("terms")
     .select(
       "id, term, definition, example, priority, term_type_id, created_datetime_utc, term_types(name)",
+      { count: "exact" },
     )
     .order("priority", { ascending: false })
-    .order("created_datetime_utc", { ascending: false });
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -171,6 +177,14 @@ export default async function AdminTermsPage({ searchParams }: TermsPageProps) {
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/terms"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="terms"
+      />
     </section>
   );
 }

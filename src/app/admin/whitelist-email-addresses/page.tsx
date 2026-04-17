@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
 import { formatDate } from "../_lib/crud";
+import { getAdminPagination } from "../_lib/pagination";
 import { deleteWhitelistEmailAddressAction } from "./actions";
 
 type WhitelistEmailAddressesPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
+    page?: string;
   }>;
 };
 
@@ -16,12 +19,14 @@ export default async function AdminWhitelistEmailAddressesPage({
 }: WhitelistEmailAddressesPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: addresses, error } = await supabase
+  const { data: addresses, error, count } = await supabase
     .from("whitelist_email_addresses")
-    .select("id, email_address, created_datetime_utc")
-    .order("created_datetime_utc", { ascending: false });
+    .select("id, email_address, created_datetime_utc", { count: "exact" })
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -128,6 +133,14 @@ export default async function AdminWhitelistEmailAddressesPage({
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/whitelist-email-addresses"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="whitelist addresses"
+      />
     </section>
   );
 }

@@ -1,5 +1,13 @@
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
+import { getAdminPagination } from "../_lib/pagination";
+
+type HumorFlavorsPageProps = {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+};
 
 function formatDate(value: string | null) {
   if (!value) {
@@ -13,14 +21,19 @@ function formatDate(value: string | null) {
   });
 }
 
-export default async function AdminHumorFlavorsPage() {
+export default async function AdminHumorFlavorsPage({
+  searchParams,
+}: HumorFlavorsPageProps) {
   await requireSuperadmin();
+  const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: humorFlavors, error } = await supabase
+  const { data: humorFlavors, error, count } = await supabase
     .from("humor_flavors")
-    .select("id, created_datetime_utc, slug, description")
-    .order("id", { ascending: true });
+    .select("id, created_datetime_utc, slug, description", { count: "exact" })
+    .order("id", { ascending: true })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -78,6 +91,14 @@ export default async function AdminHumorFlavorsPage() {
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/humor-flavors"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="humor flavors"
+      />
     </section>
   );
 }

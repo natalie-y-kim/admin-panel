@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
 import { formatDate } from "../_lib/crud";
+import { getAdminPagination } from "../_lib/pagination";
 
 type HumorMixRow = {
   id: number;
@@ -15,6 +17,7 @@ type HumorMixPageProps = {
   searchParams: Promise<{
     success?: string;
     error?: string;
+    page?: string;
   }>;
 };
 
@@ -37,12 +40,16 @@ export default async function AdminHumorMixPage({
 }: HumorMixPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: humorMixRows, error } = await supabase
+  const { data: humorMixRows, error, count } = await supabase
     .from("humor_flavor_mix")
-    .select("id, created_datetime_utc, humor_flavor_id, caption_count, humor_flavors(slug)")
-    .order("created_datetime_utc", { ascending: false });
+    .select("id, created_datetime_utc, humor_flavor_id, caption_count, humor_flavors(slug)", {
+      count: "exact",
+    })
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -131,6 +138,14 @@ export default async function AdminHumorMixPage({
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/humor-mix"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="humor mix rows"
+      />
     </section>
   );
 }

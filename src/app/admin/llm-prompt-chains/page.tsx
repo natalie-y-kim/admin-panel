@@ -1,5 +1,13 @@
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
+import { getAdminPagination } from "../_lib/pagination";
+
+type LlmPromptChainsPageProps = {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+};
 
 type PromptChainLookup = { profile_id?: string | null; image_id?: string | null } | { profile_id?: string | null; image_id?: string | null }[] | null;
 
@@ -27,14 +35,21 @@ function getLookupValue(value: PromptChainLookup, key: "profile_id" | "image_id"
   return value[key] ?? "-";
 }
 
-export default async function AdminLlmPromptChainsPage() {
+export default async function AdminLlmPromptChainsPage({
+  searchParams,
+}: LlmPromptChainsPageProps) {
   await requireSuperadmin();
+  const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: promptChains, error } = await supabase
+  const { data: promptChains, error, count } = await supabase
     .from("llm_prompt_chains")
-    .select("id, created_datetime_utc, caption_request_id, caption_requests(profile_id, image_id)")
-    .order("created_datetime_utc", { ascending: false });
+    .select("id, created_datetime_utc, caption_request_id, caption_requests(profile_id, image_id)", {
+      count: "exact",
+    })
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -108,6 +123,14 @@ export default async function AdminLlmPromptChainsPage() {
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/llm-prompt-chains"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="prompt chains"
+      />
     </section>
   );
 }

@@ -1,5 +1,13 @@
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminPagination } from "../_components/AdminPagination";
+import { getAdminPagination } from "../_lib/pagination";
+
+type LlmResponsesPageProps = {
+  searchParams: Promise<{
+    page?: string;
+  }>;
+};
 
 type LlmLookup =
   | { email?: string | null; slug?: string | null; name?: string | null }
@@ -30,16 +38,22 @@ function getLookupValue(value: LlmLookup, key: "email" | "slug" | "name") {
   return value[key] ?? "-";
 }
 
-export default async function AdminLlmResponsesPage() {
+export default async function AdminLlmResponsesPage({
+  searchParams,
+}: LlmResponsesPageProps) {
   await requireSuperadmin();
+  const params = await searchParams;
+  const { page, pageSize, from, to } = getAdminPagination(params);
   const supabase = await createClient();
 
-  const { data: responses, error } = await supabase
+  const { data: responses, error, count } = await supabase
     .from("llm_model_responses")
     .select(
       "id, created_datetime_utc, llm_model_response, processing_time_seconds, llm_model_id, profile_id, caption_request_id, llm_system_prompt, llm_user_prompt, llm_temperature, humor_flavor_id, llm_prompt_chain_id, humor_flavor_step_id, llm_models(name), profiles!llm_model_responses_profile_id_fkey(email), humor_flavors(slug)",
+      { count: "exact" },
     )
-    .order("created_datetime_utc", { ascending: false });
+    .order("created_datetime_utc", { ascending: false })
+    .range(from, to);
 
   return (
     <section className="w-full rounded-xl bg-white p-6 shadow-sm">
@@ -175,6 +189,14 @@ export default async function AdminLlmResponsesPage() {
           </tbody>
         </table>
       </div>
+      <AdminPagination
+        basePath="/admin/llm-responses"
+        searchParams={params}
+        page={page}
+        pageSize={pageSize}
+        totalCount={count ?? 0}
+        itemLabel="LLM responses"
+      />
     </section>
   );
 }
