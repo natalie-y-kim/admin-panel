@@ -282,7 +282,12 @@ export default async function AdminLlmResponsesPage({
                   <AdminBadge tone="warning">
                     Flavor {getLookupValue(response.humor_flavors as LlmLookup, "slug")}
                   </AdminBadge>
-                  <AdminInspector summary="Open details" className="w-full lg:text-right">
+                  <AdminInspector
+                    summary="Open details"
+                    closedLabel="Open details"
+                    openLabel="Close details"
+                    className="w-full lg:text-right"
+                  >
                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
                       <div className="space-y-4">
                         <div>

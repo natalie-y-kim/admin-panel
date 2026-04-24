@@ -245,7 +245,12 @@ export default async function AdminUsersPage({ searchParams }: UsersPageProps) {
                     {user.last_name ? (
                       <AdminBadge tone="neutral">Last: {user.last_name}</AdminBadge>
                     ) : null}
-                    <AdminInspector summary="Open details" className="w-full lg:text-right">
+                    <AdminInspector
+                      summary="Open details"
+                      closedLabel="Open details"
+                      openLabel="Close details"
+                      className="w-full lg:text-right"
+                    >
                       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                         <div>
                           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">

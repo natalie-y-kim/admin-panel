@@ -405,7 +405,11 @@ export default async function AdminCaptionsPage({
                         </div>
                       </div>
 
-                      <AdminInspector summary="Open details">
+                      <AdminInspector
+                        summary="Open details"
+                        closedLabel="Open details"
+                        openLabel="Close details"
+                      >
                         <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
                           <div>
                             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
