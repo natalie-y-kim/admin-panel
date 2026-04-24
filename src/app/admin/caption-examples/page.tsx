@@ -53,7 +53,7 @@ export default async function AdminCaptionExamplesPage({
       "id, image_description, caption, explanation, priority, image_id, created_datetime_utc, images(url)",
       { count: "exact" },
     )
-    .order("priority", { ascending: false })
+    // .order("priority", { ascending: false })
     .order("created_datetime_utc", { ascending: false })
     .range(from, to);
 
