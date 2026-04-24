@@ -2,7 +2,6 @@ import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
 import { AdminBadge } from "../_components/AdminBadge";
-import { AdminInspector } from "../_components/AdminInspector";
 import { AdminListShell } from "../_components/AdminListShell";
 import { AdminPagination } from "../_components/AdminPagination";
 import { AdminViewToggle } from "../_components/AdminViewToggle";
@@ -367,7 +366,10 @@ export default async function AdminCaptionsPage({
                   <div className="min-w-0 flex-1">
                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-start">
                       <div className="min-w-0">
-                        <p className="text-base font-semibold leading-6 text-slate-900">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Full caption
+                        </p>
+                        <p className="mt-2 whitespace-pre-wrap text-base font-semibold leading-6 text-slate-900">
                           {caption.content ?? "-"}
                         </p>
                         <p className="mt-2 text-sm text-slate-500">
@@ -385,68 +387,31 @@ export default async function AdminCaptionsPage({
                       </div>
                     </div>
 
-                    <div className="mt-4 grid gap-3 text-sm md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Profile ID
-                          </p>
-                          <p className="mt-1 truncate font-mono text-xs text-slate-700">
-                            {caption.profile_id}
-                          </p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Image ID
-                          </p>
-                          <p className="mt-1 truncate font-mono text-xs text-slate-700">
-                            {caption.image_id}
-                          </p>
-                        </div>
+                    <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-3">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Caption ID
+                        </p>
+                        <p className="mt-1 break-all font-mono text-xs text-slate-700">
+                          {caption.id}
+                        </p>
                       </div>
-
-                      <AdminInspector
-                        summary="Open details"
-                        closedLabel="Open details"
-                        openLabel="Close details"
-                      >
-                        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-                          <div>
-                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                              Full caption
-                            </p>
-                            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                              {caption.content ?? "-"}
-                            </p>
-                          </div>
-                          <div className="grid gap-3">
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                Caption ID
-                              </p>
-                              <p className="mt-1 break-all font-mono text-xs text-slate-700">
-                                {caption.id}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                Profile ID
-                              </p>
-                              <p className="mt-1 break-all font-mono text-xs text-slate-700">
-                                {caption.profile_id}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                Image ID
-                              </p>
-                              <p className="mt-1 break-all font-mono text-xs text-slate-700">
-                                {caption.image_id}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </AdminInspector>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Profile ID
+                        </p>
+                        <p className="mt-1 break-all font-mono text-xs text-slate-700">
+                          {caption.profile_id}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Image ID
+                        </p>
+                        <p className="mt-1 break-all font-mono text-xs text-slate-700">
+                          {caption.image_id}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

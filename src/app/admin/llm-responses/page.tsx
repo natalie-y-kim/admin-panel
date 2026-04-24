@@ -260,7 +260,7 @@ export default async function AdminLlmResponsesPage({
                       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                         Prompt Chain
                       </p>
-                      <p className="mt-1 text-sm text-slate-700">
+                      <p className="mt-1 break-all font-mono text-xs text-slate-700">
                         {response.llm_prompt_chain_id ?? "-"}
                       </p>
                     </div>
@@ -268,11 +268,86 @@ export default async function AdminLlmResponsesPage({
                       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                         Flavor Step
                       </p>
-                      <p className="mt-1 text-sm text-slate-700">
+                      <p className="mt-1 break-all font-mono text-xs text-slate-700">
                         {response.humor_flavor_step_id ?? "-"}
                       </p>
                     </div>
                   </div>
+
+                  <AdminInspector
+                    summary="Open details"
+                    closedLabel="Open details"
+                    openLabel="Close details"
+                    className="mt-4 block"
+                  >
+                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(16rem,0.9fr)]">
+                      <div className="space-y-4">
+                        <section className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                            LLM Response
+                          </p>
+                          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-700">
+                            {response.llm_model_response ?? "-"}
+                          </p>
+                        </section>
+                        <section className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                            System Prompt
+                          </p>
+                          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-700">
+                            {response.llm_system_prompt}
+                          </p>
+                        </section>
+                        <section className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                            User Prompt
+                          </p>
+                          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-700">
+                            {response.llm_user_prompt}
+                          </p>
+                        </section>
+                      </div>
+                      <aside className="rounded-xl border border-slate-200 bg-slate-100/80 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Response Metadata
+                        </p>
+                        <div className="mt-3 grid gap-3">
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              Response ID
+                            </p>
+                            <p className="mt-1 break-all font-mono text-xs text-slate-700">
+                              {response.id}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              Caption Request
+                            </p>
+                            <p className="mt-1 text-sm text-slate-700">
+                              {response.caption_request_id}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              Prompt Chain
+                            </p>
+                            <p className="mt-1 break-all font-mono text-xs text-slate-700">
+                              {response.llm_prompt_chain_id ?? "-"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              Flavor Step
+                            </p>
+                            <p className="mt-1 break-all font-mono text-xs text-slate-700">
+                              {response.humor_flavor_step_id ?? "-"}
+                            </p>
+                          </div>
+                        </div>
+                      </aside>
+                    </div>
+                  </AdminInspector>
                 </div>
 
                 <div className="flex flex-wrap items-start gap-2 lg:w-56 lg:justify-end">
@@ -282,75 +357,6 @@ export default async function AdminLlmResponsesPage({
                   <AdminBadge tone="warning">
                     Flavor {getLookupValue(response.humor_flavors as LlmLookup, "slug")}
                   </AdminBadge>
-                  <AdminInspector
-                    summary="Open details"
-                    closedLabel="Open details"
-                    openLabel="Close details"
-                    className="w-full lg:text-right"
-                  >
-                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            LLM Response
-                          </p>
-                          <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-700">
-                            {response.llm_model_response ?? "-"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            System Prompt
-                          </p>
-                          <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-700">
-                            {response.llm_system_prompt}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            User Prompt
-                          </p>
-                          <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-700">
-                            {response.llm_user_prompt}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="grid gap-3">
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Response ID
-                          </p>
-                          <p className="mt-1 break-all font-mono text-xs text-slate-700">
-                            {response.id}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Caption Request
-                          </p>
-                          <p className="mt-1 text-sm text-slate-700">
-                            {response.caption_request_id}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Prompt Chain
-                          </p>
-                          <p className="mt-1 break-all font-mono text-xs text-slate-700">
-                            {response.llm_prompt_chain_id ?? "-"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Flavor Step
-                          </p>
-                          <p className="mt-1 break-all font-mono text-xs text-slate-700">
-                            {response.humor_flavor_step_id ?? "-"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </AdminInspector>
                 </div>
               </div>
             </article>

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
 import { AdminBadge } from "../_components/AdminBadge";
-import { AdminInspector } from "../_components/AdminInspector";
 import { AdminListShell } from "../_components/AdminListShell";
 import { AdminPagination } from "../_components/AdminPagination";
 import { AdminViewToggle } from "../_components/AdminViewToggle";
@@ -218,20 +217,46 @@ export default async function AdminUsersPage({ searchParams }: UsersPageProps) {
                     <p className="text-base font-semibold leading-6 text-slate-900">
                       {fullName || "Unnamed user"}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 break-words text-sm text-slate-600">
                       {user.email ?? "-"}
                     </p>
                     <p className="mt-2 text-sm text-slate-500">
                       Created {formatDate(user.created_datetime_utc)}
                     </p>
 
-                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                        User ID
-                      </p>
-                      <p className="mt-1 truncate font-mono text-xs text-slate-700">
-                        {user.id}
-                      </p>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Email
+                        </p>
+                        <p className="mt-1 break-words text-sm text-slate-700">
+                          {user.email ?? "-"}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          User ID
+                        </p>
+                        <p className="mt-1 break-all font-mono text-xs text-slate-700">
+                          {user.id}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          First name
+                        </p>
+                        <p className="mt-1 text-sm text-slate-700">
+                          {user.first_name ?? "-"}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Last name
+                        </p>
+                        <p className="mt-1 text-sm text-slate-700">
+                          {user.last_name ?? "-"}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -245,35 +270,6 @@ export default async function AdminUsersPage({ searchParams }: UsersPageProps) {
                     {user.last_name ? (
                       <AdminBadge tone="neutral">Last: {user.last_name}</AdminBadge>
                     ) : null}
-                    <AdminInspector
-                      summary="Open details"
-                      closedLabel="Open details"
-                      openLabel="Close details"
-                      className="w-full lg:text-right"
-                    >
-                      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Profile
-                          </p>
-                          <div className="mt-2 space-y-2 text-sm text-slate-700">
-                            <p>Email: {user.email ?? "-"}</p>
-                            <p>First name: {user.first_name ?? "-"}</p>
-                            <p>Last name: {user.last_name ?? "-"}</p>
-                            <p>Status: {user.is_superadmin ? "Superadmin" : "Standard user"}</p>
-                            <p>Created: {formatDate(user.created_datetime_utc)}</p>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            User ID
-                          </p>
-                          <p className="mt-2 break-all font-mono text-xs text-slate-700">
-                            {user.id}
-                          </p>
-                        </div>
-                      </div>
-                    </AdminInspector>
                   </div>
                 </div>
               </article>
