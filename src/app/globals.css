@@ -3,13 +3,27 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f0e7;
+  --foreground: #172033;
+  --panel: rgba(255, 252, 246, 0.88);
+  --panel-strong: #fffdf8;
+  --panel-muted: #f3ece1;
+  --border: rgba(23, 32, 51, 0.1);
+  --accent: #c96f3c;
+  --accent-soft: #fff1e4;
+  --navy: #172033;
 }
 
 .dark {
-  --background: #020617;
-  --foreground: #e2e8f0;
+  --background: #08111f;
+  --foreground: #edf2f7;
+  --panel: rgba(12, 22, 38, 0.92);
+  --panel-strong: #0f1b2d;
+  --panel-muted: #101a29;
+  --border: rgba(148, 163, 184, 0.18);
+  --accent: #f2a65a;
+  --accent-soft: rgba(242, 166, 90, 0.12);
+  --navy: #0b1320;
 }
 
 @theme inline {
@@ -22,30 +36,78 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    sans-serif;
+  background-image:
+    radial-gradient(circle at top left, rgba(242, 166, 90, 0.12), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(23, 32, 51, 0.12), transparent 32%);
+}
+
+.admin-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #172033;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.admin-primary-button:hover {
+  background: #22324b;
+}
+
+.admin-primary-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #f2a65a, 0 0 0 4px var(--background);
+}
+
+.admin-primary-button:disabled,
+.admin-primary-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-hover-card {
+  border-color: var(--border);
+  background: var(--panel-strong);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-hover-card:hover {
+  border-color: #d5b497;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.1);
 }
 
 .dark .bg-white {
-  background-color: #0f172a;
+  background-color: var(--panel-strong);
 }
 
 .dark .bg-purple-50 {
-  background-color: #111827;
+  background-color: rgba(242, 166, 90, 0.1);
 }
 
 .dark .bg-slate-50,
 .dark .bg-slate-100 {
-  background-color: #1e293b;
+  background-color: var(--panel-muted);
 }
 
 .dark .border-slate-200,
 .dark .border-slate-300 {
-  border-color: #334155;
+  border-color: rgba(148, 163, 184, 0.18);
 }
 
 .dark .border-purple-100,
 .dark .border-purple-200 {
-  border-color: rgba(168, 85, 247, 0.35);
+  border-color: rgba(242, 166, 90, 0.28);
 }
 
 .dark .text-slate-900,
@@ -62,14 +124,31 @@ body {
 .dark .text-purple-900,
 .dark .text-purple-800,
 .dark .text-purple-700 {
-  color: #e9d5ff;
+  color: #f7c99d;
 }
 
 .dark .divide-slate-200 > :not(:last-child) {
-  border-color: #334155;
+  border-color: rgba(148, 163, 184, 0.18);
 }
 
 .dark .shadow-sm,
 .dark .shadow-md {
   box-shadow: none;
+}
+
+.dark .admin-primary-button {
+  background: #f2a65a;
+  color: #172033;
+}
+
+.dark .admin-primary-button:hover {
+  background: #f6b878;
+}
+
+.dark .admin-primary-button:focus-visible {
+  box-shadow: 0 0 0 2px #f2a65a, 0 0 0 4px #08111f;
+}
+
+.dark .admin-hover-card {
+  background: var(--panel-strong);
 }

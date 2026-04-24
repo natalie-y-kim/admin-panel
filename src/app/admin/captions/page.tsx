@@ -225,7 +225,7 @@ export default async function AdminCaptionsPage({
           </label>
           <button
             type="submit"
-            className="self-end rounded-md bg-purple-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+            className="admin-primary-button self-end"
           >
             Apply
           </button>
@@ -345,7 +345,7 @@ export default async function AdminCaptionsPage({
             return (
               <article
                 key={caption.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-purple-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
+                className="admin-hover-card rounded-2xl border p-4 transition dark:border-slate-700"
               >
                 <div className="grid gap-4 md:grid-cols-[auto_minmax(0,1fr)]">
                   <div className="shrink-0">

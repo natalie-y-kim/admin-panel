@@ -103,7 +103,7 @@ export default async function NewLlmModelsPage({
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            className="rounded-md bg-purple-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+            className="admin-primary-button"
           >
             Create Model
           </button>

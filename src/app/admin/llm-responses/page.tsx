@@ -223,7 +223,7 @@ export default async function AdminLlmResponsesPage({
           {responses.map((response) => (
             <article
               key={response.id}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-purple-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
+              className="admin-hover-card rounded-2xl border p-4 transition dark:border-slate-700"
             >
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start">
                 <div className="min-w-0">

@@ -33,7 +33,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(nextTheme)}
-      className="rounded-md border border-purple-200 bg-purple-50 px-3 py-1.5 text-sm font-medium text-purple-800 transition hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-100 dark:hover:bg-purple-500/20 dark:focus:ring-offset-slate-950"
+      className="rounded-full border border-[var(--border)] bg-[color:var(--panel-strong)] px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-[#d5b497] hover:bg-[#fff8ef] focus:outline-none focus:ring-2 focus:ring-[#f2a65a] focus:ring-offset-2 dark:text-slate-100 dark:hover:bg-[var(--panel-muted)] dark:focus:ring-offset-slate-950"
       suppressHydrationWarning
     >
       {theme === "dark" ? "Light mode" : "Dark mode"}

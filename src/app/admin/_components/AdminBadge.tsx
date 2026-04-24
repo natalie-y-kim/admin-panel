@@ -7,7 +7,7 @@ type AdminBadgeTone =
 
 const toneClassNames: Record<AdminBadgeTone, string> = {
   neutral:
-    "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200",
+    "border-[var(--border)] bg-[color:var(--panel-strong)] text-slate-700 dark:text-slate-200",
   success:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200",
   warning:
@@ -15,7 +15,7 @@ const toneClassNames: Record<AdminBadgeTone, string> = {
   danger:
     "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200",
   accent:
-    "border-purple-200 bg-purple-50 text-purple-800 dark:border-purple-500/30 dark:bg-purple-500/10 dark:text-purple-100",
+    "border-[#ead4bf] bg-[#fff4e9] text-[#9b531f] dark:border-[#f2a65a]/30 dark:bg-[#f2a65a]/10 dark:text-[#f6c28b]",
 };
 
 export function AdminBadge({
@@ -27,7 +27,7 @@ export function AdminBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${toneClassNames[tone]}`}
+      className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium ${toneClassNames[tone]}`}
     >
       {children}
     </span>

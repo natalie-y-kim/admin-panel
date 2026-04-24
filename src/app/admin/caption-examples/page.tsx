@@ -66,7 +66,7 @@ export default async function AdminCaptionExamplesPage({
         </div>
         <Link
           href="/admin/caption-examples/new"
-          className="inline-flex rounded-md bg-purple-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+          className="admin-primary-button"
         >
           New Example
         </Link>
