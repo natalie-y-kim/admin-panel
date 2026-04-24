@@ -65,7 +65,7 @@ export default async function AdminCaptionsPage({
 }: CaptionsPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
-  const { page, pageSize, from, to } = getAdminPagination(params);
+  const { page, pageSize, from, to } = getAdminPagination(params, 20);
   const searchQuery = getStringParam(params, "q");
   const publicFilter = getBooleanParam(params, "public");
   const featuredFilter = getBooleanParam(params, "featured");
@@ -110,6 +110,7 @@ export default async function AdminCaptionsPage({
 
   const { data, error, count } = await captionsQuery
     .order("created_datetime_utc", { ascending: false })
+    .order("id", { ascending: false })
     .range(from, to);
 
   const captions: CaptionWithImage[] = (data ?? []).map((row) => ({
@@ -126,6 +127,16 @@ export default async function AdminCaptionsPage({
       | { url: string | null }[]
       | null,
   }));
+
+  console.log("[admin/captions] pagination", {
+    page,
+    pageSize,
+    from,
+    to,
+    count,
+    returnedCount: captions.length,
+    captionIds: captions.slice(0, 5).map((caption) => caption.id),
+  });
 
   return (
     <AdminListShell
