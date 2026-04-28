@@ -1,5 +1,6 @@
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
+import { AdminListShell } from "../_components/AdminListShell";
 import { AdminPagination } from "../_components/AdminPagination";
 import { getAdminPagination } from "../_lib/pagination";
 
@@ -36,17 +37,17 @@ export default async function AdminHumorFlavorsPage({
     .range(from, to);
 
   return (
-    <section className="w-full rounded-xl bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold text-slate-900">Humor Flavors</h1>
-      <p className="mt-2 text-sm text-slate-600">Read-only humor flavor list.</p>
-
+    <AdminListShell
+      title="Humor Flavors"
+      description="Read-only humor flavor list."
+    >
       {error ? (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           Unable to load humor flavors right now.
         </p>
       ) : null}
 
-      <div className="mt-5 overflow-x-auto">
+      <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
             <tr>
@@ -99,6 +100,6 @@ export default async function AdminHumorFlavorsPage({
         totalCount={count ?? 0}
         itemLabel="humor flavors"
       />
-    </section>
+    </AdminListShell>
   );
 }
