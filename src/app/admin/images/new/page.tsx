@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createImageAction } from "../actions";
+import { ImageUploadButton } from "../../_components/ImageUploadButton";
 
 type NewImagePageProps = {
   searchParams: Promise<{
@@ -25,19 +26,11 @@ export default async function NewImagePage({ searchParams }: NewImagePageProps) 
 
       <form action={createImageAction} className="mt-6 space-y-5">
         <div>
-          <label
-            htmlFor="url"
-            className="mb-1 block text-sm font-medium text-slate-700"
-          >
-            URL
-          </label>
-          <input
-            id="url"
-            name="url"
-            type="url"
+          <ImageUploadButton
+            name="image_file"
+            label="Choose image"
             required
-            placeholder="https://example.com/image.jpg"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none ring-slate-300 placeholder:text-slate-400 focus:ring-2"
+            description="Choose an image file to upload. The selected image will be stored and its public URL saved automatically."
           />
         </div>
 

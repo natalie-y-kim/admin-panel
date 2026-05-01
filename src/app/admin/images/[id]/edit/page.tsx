@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
 import { createClient } from "@/lib/supabase/server";
 import { updateImageAction } from "../../actions";
+import { ImageUploadButton } from "../../../_components/ImageUploadButton";
 
 type EditImagePageProps = {
   params: Promise<{ id: string }>;
@@ -62,21 +63,13 @@ export default async function EditImagePage({
 
       <form action={updateImageAction} className="mt-6 space-y-5">
         <input type="hidden" name="id" value={image.id} />
+        <input type="hidden" name="existing_url" value={image.url ?? ""} />
 
         <div>
-          <label
-            htmlFor="url"
-            className="mb-1 block text-sm font-medium text-slate-700"
-          >
-            URL
-          </label>
-          <input
-            id="url"
-            name="url"
-            type="url"
-            required
-            defaultValue={image.url ?? ""}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none ring-slate-300 placeholder:text-slate-400 focus:ring-2"
+          <ImageUploadButton
+            name="image_file"
+            label="Choose image"
+            description="Select a new image file to replace the current one, or leave this empty to keep the existing image."
           />
         </div>
 
