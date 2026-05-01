@@ -14,6 +14,7 @@ import {
 } from "../_lib/filters";
 import { getAdminPagination } from "../_lib/pagination";
 import { deleteImageAction } from "./actions";
+import { DeleteImageDialog } from "./_components/DeleteImageDialog";
 
 type AdminImagesPageProps = {
   searchParams: Promise<{
@@ -40,11 +41,12 @@ export default async function AdminImagesPage({
 }: AdminImagesPageProps) {
   await requireSuperadmin();
   const params = await searchParams;
-  const { page, pageSize, from, to } = getAdminPagination(params);
   const searchQuery = getStringParam(params, "q");
   const publicFilter = getBooleanParam(params, "public");
   const profileId = getStringParam(params, "profileId");
-  const view = getStringParam(params, "view") === "table" ? "table" : "preview";
+  const view = getStringParam(params, "view") === "row" ? "row" : "grid";
+  const pageSizeValue = view === "grid" ? 20 : 10;
+  const { page, pageSize, from, to } = getAdminPagination(params, pageSizeValue);
   const hasFilters = hasAdminFilters(params, ["q", "public", "profileId"]);
   const supabase = await createClient();
 
@@ -76,7 +78,7 @@ export default async function AdminImagesPage({
   return (
     <AdminListShell
       title="Images"
-      description="Review visual assets in a contact-sheet style layout, then switch to a dense table when you need raw comparison."
+      description="Browse visual assets in a grid layout or detailed row view with quick actions and information."
       toolbar={
         <div className="flex flex-wrap items-center gap-3">
           <AdminViewToggle
@@ -84,8 +86,8 @@ export default async function AdminImagesPage({
             searchParams={params}
             currentView={view}
             options={[
-              { key: "preview", label: "Preview" },
-              { key: "table", label: "Table" },
+              { key: "grid", label: "Grid" },
+              { key: "row", label: "Row" },
             ]}
           />
           <Link
@@ -115,12 +117,12 @@ export default async function AdminImagesPage({
           <div>
             <p className="text-sm font-semibold text-slate-900">Image browser</p>
             <p className="mt-1 text-sm text-slate-600">
-              Preview emphasizes the asset itself, its visibility state, and quick actions before lower-priority IDs.
+              Grid view emphasizes the asset itself, its visibility state, and quick actions before lower-priority IDs.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <AdminBadge tone="accent">Default view: Preview</AdminBadge>
-            <AdminBadge tone="neutral">Dense fallback: Table</AdminBadge>
+            <AdminBadge tone="accent">Default: Grid view</AdminBadge>
+            <AdminBadge tone="neutral">Alternative: Row view</AdminBadge>
           </div>
         </div>
 
@@ -166,7 +168,7 @@ export default async function AdminImagesPage({
           </button>
           {hasFilters ? (
             <Link
-              href={view === "table" ? "/admin/images?view=table" : "/admin/images"}
+              href={view === "row" ? "/admin/images?view=row" : "/admin/images"}
               className="self-end rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-white"
             >
               Clear
@@ -181,108 +183,7 @@ export default async function AdminImagesPage({
         </p>
       ) : null}
 
-      {view === "table" ? (
-        <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Thumbnail
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Description
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Public
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Profile ID
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Created (UTC)
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white dark:bg-slate-900">
-              {images && images.length > 0 ? (
-                images.map((image) => (
-                  <tr key={image.id}>
-                    <td className="px-3 py-2">
-                      {image.url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={image.url}
-                          alt="Image thumbnail"
-                          className="h-12 w-12 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
-                    </td>
-                    <td className="max-w-lg px-3 py-2 text-slate-700">
-                      {image.image_description ?? "-"}
-                    </td>
-                    <td className="px-3 py-2 text-slate-700">
-                      {image.is_public ? "Yes" : "No"}
-                    </td>
-                    <td className="px-3 py-2 font-mono text-xs text-slate-700">
-                      {image.profile_id ?? "-"}
-                    </td>
-                    <td className="px-3 py-2 text-slate-700">
-                      {formatDate(image.created_datetime_utc)}
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Link
-                          href={`/admin/images/${image.id}/edit`}
-                          className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                        >
-                          Edit
-                        </Link>
-                        <details className="relative">
-                          <summary className="inline-flex cursor-pointer list-none rounded-md border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 transition hover:bg-red-50">
-                            Delete
-                          </summary>
-                          <div className="absolute right-0 z-10 mt-2 w-56 rounded-md border border-slate-200 bg-white p-3 shadow-lg">
-                            <p className="text-xs text-slate-600">
-                              Confirm delete for this image?
-                            </p>
-                            <form action={deleteImageAction} className="mt-2">
-                              <input type="hidden" name="id" value={image.id} />
-                              <button
-                                type="submit"
-                                className="w-full rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-500"
-                              >
-                                Confirm Delete
-                              </button>
-                            </form>
-                          </div>
-                        </details>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    className="px-3 py-6 text-center text-slate-500"
-                    colSpan={6}
-                  >
-                    {error
-                      ? "Unable to display images."
-                      : hasFilters
-                        ? "No images match these filters."
-                        : "No images found."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : images && images.length > 0 ? (
+      {view === "row" && images ? (
         <div className="mt-5 space-y-4">
           {images.map((image) => (
             <article
@@ -397,6 +298,117 @@ export default async function AdminImagesPage({
                       </AdminInspector>
                     </div>
                   </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : images && images.length > 0 ? (
+        <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {images.map((image) => (
+            <article
+              key={image.id}
+              className="admin-hover-card group relative overflow-visible rounded-2xl border bg-white p-0 transition dark:border-slate-700 dark:bg-slate-900"
+            >
+              <div className="aspect-square overflow-hidden">
+                {image.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={image.url}
+                    alt="Image preview"
+                    className="h-full w-full object-cover transition group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-slate-100 text-sm text-slate-400 dark:bg-slate-800">
+                    No image
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {image.image_description ?? "Untitled image"}
+                    </p>
+                  </div>
+                  <AdminBadge tone={image.is_public ? "success" : "neutral"}>
+                    {image.is_public ? "Public" : "Private"}
+                  </AdminBadge>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/admin/images/${image.id}/edit`}
+                      className="inline-flex rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      Edit
+                    </Link>
+                    <DeleteImageDialog imageId={image.id} />
+                  </div>
+
+                  <details className="group/details relative">
+                    <summary className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100">
+                      <svg
+                        className="h-3 w-3 transition group-open/details:rotate-180"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      <span className="group-open/details:hidden">More</span>
+                      <span className="hidden group-open/details:inline">Less</span>
+                    </summary>
+
+                    <div className="absolute bottom-full right-0 z-20 mb-2 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            Full Description
+                          </p>
+                          <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                            {image.image_description ?? "No description provided"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            Source URL
+                          </p>
+                          <p className="mt-1 break-all text-xs font-mono text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded">
+                            {image.url ?? "No URL"}
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                              Image ID
+                            </p>
+                            <p className="mt-1 break-all font-mono text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded">
+                              {image.id}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                              Profile ID
+                            </p>
+                            <p className="mt-1 break-all font-mono text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded">
+                              {image.profile_id ?? "No profile"}
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            Created
+                          </p>
+                          <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                            {formatDate(image.created_datetime_utc)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </details>
                 </div>
               </div>
             </article>

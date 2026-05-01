@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminBadge } from "../_components/AdminBadge";
 import { AdminListShell } from "../_components/AdminListShell";
 import { AdminPagination } from "../_components/AdminPagination";
-import { AdminViewToggle } from "../_components/AdminViewToggle";
 import {
   getBooleanParam,
   getLikePattern,
@@ -70,7 +69,7 @@ export default async function AdminCaptionsPage({
   const featuredFilter = getBooleanParam(params, "featured");
   const profileId = getStringParam(params, "profileId");
   const imageId = getStringParam(params, "imageId");
-  const view = getStringParam(params, "view") === "table" ? "table" : "preview";
+  const view = "preview";
   const hasFilters = hasAdminFilters(params, [
     "q",
     "public",
@@ -140,18 +139,7 @@ export default async function AdminCaptionsPage({
   return (
     <AdminListShell
       title="Captions"
-      description="Review caption performance in a preview-first layout, then switch to a dense table when you need comparison mode."
-      toolbar={
-        <AdminViewToggle
-          basePath="/admin/captions"
-          searchParams={params}
-          currentView={view}
-          options={[
-            { key: "preview", label: "Preview" },
-            { key: "table", label: "Table" },
-          ]}
-        />
-      }
+      description="Browse all captions with their performance metrics, visibility status, and featured status."
     >
       <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-800/60">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -231,7 +219,7 @@ export default async function AdminCaptionsPage({
           </button>
           {hasFilters ? (
             <Link
-              href={view === "table" ? "/admin/captions?view=table" : "/admin/captions"}
+              href="/admin/captions"
               className="self-end rounded-md border border-slate-300 px-4 py-2 text-center text-sm font-medium text-slate-700 transition hover:bg-white"
             >
               Clear
@@ -246,98 +234,7 @@ export default async function AdminCaptionsPage({
         </p>
       ) : null}
 
-      {view === "table" ? (
-        <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Thumbnail
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Content
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Profile ID
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Image ID
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Likes
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Public
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Featured
-                </th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700">
-                  Created (UTC)
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white dark:bg-slate-900">
-              {captions.length > 0 ? (
-                captions.map((caption) => {
-                  const imageUrl = getImageUrl(caption.images);
-
-                  return (
-                    <tr key={caption.id}>
-                      <td className="px-3 py-2">
-                        {imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={imageUrl}
-                            alt="Caption image"
-                            className="h-12 w-12 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <span className="text-slate-400">-</span>
-                        )}
-                      </td>
-                      <td className="max-w-lg px-3 py-2 text-slate-700">
-                        {caption.content ?? "-"}
-                      </td>
-                      <td className="px-3 py-2 font-mono text-xs text-slate-700">
-                        {caption.profile_id}
-                      </td>
-                      <td className="px-3 py-2 font-mono text-xs text-slate-700">
-                        {caption.image_id}
-                      </td>
-                      <td className="px-3 py-2 text-slate-700">
-                        {caption.like_count}
-                      </td>
-                      <td className="px-3 py-2 text-slate-700">
-                        {caption.is_public ? "Yes" : "No"}
-                      </td>
-                      <td className="px-3 py-2 text-slate-700">
-                        {caption.is_featured ? "Yes" : "No"}
-                      </td>
-                      <td className="px-3 py-2 text-slate-700">
-                        {formatDate(caption.created_datetime_utc)}
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td
-                    className="px-3 py-6 text-center text-slate-500"
-                    colSpan={8}
-                  >
-                    {error
-                      ? "Unable to display captions."
-                      : hasFilters
-                        ? "No captions match these filters."
-                        : "No captions found."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : captions.length > 0 ? (
+      {captions.length > 0 ? (
         <div className="mt-5 space-y-4">
           {captions.map((caption) => {
             const imageUrl = getImageUrl(caption.images);
