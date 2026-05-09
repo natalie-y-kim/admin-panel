@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Fraunces } from "next/font/google";
 import { requireSuperadmin } from "@/lib/auth/requireSuperadmin";
+import { getCaptionRatingDashboardStats } from "@/lib/captionStats";
 import { createClient } from "@/lib/supabase/server";
 import { AdminBadge } from "./_components/AdminBadge";
+import { CaptionStatsDashboard } from "./_components/CaptionStatsDashboard";
 import { ImagePreviewButton } from "./_components/ImagePreviewButton";
 
 const fraunces = Fraunces({
@@ -82,6 +84,33 @@ type MostVotedCaption = {
   images: RelatedImage;
 };
 
+
+type RelatedCaptionVote = { vote_value: number | null }[] | null;
+type RelatedCaptionLike = { id: number }[] | null;
+
+type FlavorEngagementCaption = {
+  id: string;
+  created_datetime_utc: string;
+  content: string | null;
+  like_count: number | null;
+  humor_flavor_id: number | null;
+  humor_flavors: RelatedFlavor;
+  caption_votes: RelatedCaptionVote;
+  caption_likes: RelatedCaptionLike;
+};
+
+type FlavorEngagementRow = {
+  slug: string;
+  captionCount: number;
+  totalLikeCount: number;
+  voteCount: number;
+  positiveVoteCount: number;
+  negativeVoteCount: number;
+  averageLikeCount: number;
+  positiveVoteRate: number | null;
+  engagementScore: number;
+};
+
 function formatDate(value: string | null) {
   if (!value) {
     return "-";
@@ -138,6 +167,70 @@ function getAverageProcessingTime(responses: { processing_time_seconds: number }
   );
 
   return total / responses.length;
+}
+
+
+function buildFlavorEngagementRows(
+  captions: FlavorEngagementCaption[],
+): FlavorEngagementRow[] {
+  const rowsBySlug = new Map<
+    string,
+    {
+      captionCount: number;
+      totalLikeCount: number;
+      voteCount: number;
+      positiveVoteCount: number;
+      negativeVoteCount: number;
+    }
+  >();
+
+  for (const caption of captions) {
+    const slug = getRelatedValue(caption.humor_flavors, "slug");
+    const key = slug === "-" ? "Unassigned flavor" : slug;
+    const votes = caption.caption_votes ?? [];
+    const positiveVotes = votes.filter((vote) => (vote.vote_value ?? 0) > 0).length;
+    const negativeVotes = votes.filter((vote) => (vote.vote_value ?? 0) < 0).length;
+    const current = rowsBySlug.get(key) ?? {
+      captionCount: 0,
+      totalLikeCount: 0,
+      voteCount: 0,
+      positiveVoteCount: 0,
+      negativeVoteCount: 0,
+    };
+
+    current.captionCount += 1;
+    current.totalLikeCount += caption.like_count ?? 0;
+    current.voteCount += votes.length;
+    current.positiveVoteCount += positiveVotes;
+    current.negativeVoteCount += negativeVotes;
+
+    rowsBySlug.set(key, current);
+  }
+
+  return Array.from(rowsBySlug, ([slug, row]) => {
+    const averageLikeCount = row.captionCount > 0 ? row.totalLikeCount / row.captionCount : 0;
+    const positiveVoteRate = row.voteCount > 0 ? (row.positiveVoteCount / row.voteCount) * 100 : null;
+
+    return {
+      slug,
+      captionCount: row.captionCount,
+      totalLikeCount: row.totalLikeCount,
+      voteCount: row.voteCount,
+      positiveVoteCount: row.positiveVoteCount,
+      negativeVoteCount: row.negativeVoteCount,
+      averageLikeCount,
+      positiveVoteRate,
+      engagementScore: row.totalLikeCount + row.positiveVoteCount - row.negativeVoteCount,
+    };
+  })
+    .sort((a, b) => {
+      if (b.engagementScore !== a.engagementScore) {
+        return b.engagementScore - a.engagementScore;
+      }
+
+      return b.captionCount - a.captionCount;
+    })
+    .slice(0, 8);
 }
 
 function MetricCard({
@@ -257,6 +350,15 @@ export default async function AdminDashboardPage() {
   const { user } = await requireSuperadmin();
   const supabase = await createClient();
   const todayStartUtc = getTodayStartUtc();
+  const captionStatsPromise = getCaptionRatingDashboardStats(supabase)
+    .then((stats) => ({ stats, error: null }))
+    .catch((error: unknown) => ({
+      stats: null,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to load caption statistics.",
+    }));
 
   const [
     { count: usersCount, error: usersCountError },
@@ -276,6 +378,7 @@ export default async function AdminDashboardPage() {
     { data: recentLlmResponsesData, error: recentLlmResponsesError },
     { data: slowLlmResponsesData, error: slowLlmResponsesError },
     { data: llmPerformanceData, error: llmPerformanceError },
+    { data: flavorEngagementData, error: flavorEngagementError },
     { data: mostVotedCaptionsData, error: mostVotedCaptionsError },
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
@@ -350,6 +453,14 @@ export default async function AdminDashboardPage() {
     supabase
       .from("captions")
       .select(
+        "id, created_datetime_utc, content, like_count, humor_flavor_id, humor_flavors(slug), caption_votes(vote_value), caption_likes(id)",
+      )
+      .not("humor_flavor_id", "is", null)
+      .order("created_datetime_utc", { ascending: false })
+      .limit(500),
+    supabase
+      .from("captions")
+      .select(
         "id, content, like_count, profile_id, image_id, created_datetime_utc, images(url)",
       )
       .order("like_count", { ascending: false })
@@ -365,6 +476,13 @@ export default async function AdminDashboardPage() {
   const slowLlmResponses = (slowLlmResponsesData ?? []) as SlowLlmResponse[];
   const llmPerformanceRows =
     (llmPerformanceData ?? []) as { processing_time_seconds: number }[];
+  const flavorEngagementRows = buildFlavorEngagementRows(
+    (flavorEngagementData ?? []) as FlavorEngagementCaption[],
+  );
+  const topFlavor = flavorEngagementRows[0] ?? null;
+  const flavorPerformanceNote = topFlavor
+    ? `${topFlavor.slug} currently has the strongest engagement score in this sample, using captions.humor_flavor_id plus caption votes and likes.`
+    : "No flavor-linked caption engagement data is available yet.";
   const mostVotedCaptions =
     (mostVotedCaptionsData ?? []) as MostVotedCaption[];
   const averageProcessingTime = getAverageProcessingTime(llmPerformanceRows);
@@ -487,6 +605,7 @@ export default async function AdminDashboardPage() {
   ]
     .sort((a, b) => b.sortKey.localeCompare(a.sortKey))
     .slice(0, 8);
+  const captionStatsResult = await captionStatsPromise;
 
   return (
     <div className="space-y-6">
@@ -623,6 +742,17 @@ export default async function AdminDashboardPage() {
           />
         </div>
       </section>
+
+      {captionStatsResult.error ? (
+        <section className="rounded-[1.75rem] border border-red-200 bg-red-50 p-6 text-red-900 shadow-[0_20px_48px_rgba(15,23,42,0.08)] dark:border-red-400/30 dark:bg-red-950/30 dark:text-red-100">
+          <h2 className="text-xl font-semibold">
+            Unable to load caption rating statistics
+          </h2>
+          <p className="mt-2 text-sm leading-6">{captionStatsResult.error}</p>
+        </section>
+      ) : captionStatsResult.stats ? (
+        <CaptionStatsDashboard stats={captionStatsResult.stats} />
+      ) : null}
 
       <details className="group rounded-[1.75rem] border border-[var(--border)] bg-[color:var(--panel)] p-6 shadow-[0_20px_48px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-[color:var(--panel)]">
         <summary className="flex cursor-pointer list-none items-start justify-between gap-3 rounded-[1.25rem] border border-transparent pb-4 transition hover:border-[#d5b497] hover:bg-[#fff8ef] hover:px-3 hover:pt-3 hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)] dark:hover:bg-[var(--panel-muted)]">
@@ -867,6 +997,95 @@ export default async function AdminDashboardPage() {
                     colSpan={4}
                   >
                     No LLM response timing data yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </DashboardPanel>
+
+      <DashboardPanel
+        title="Humor flavor performance"
+        description="Engagement by humor flavor, calculated from captions.humor_flavor_id, captions.like_count, caption_likes, and caption_votes."
+        action={
+          <Link
+            href="/admin/captions"
+            prefetch={false}
+            className="rounded-full border border-[var(--border)] bg-[color:var(--panel-strong)] px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-[#d5b497] hover:bg-[#fff8ef] dark:text-slate-100 dark:hover:bg-[var(--panel-muted)]"
+          >
+            Review captions
+          </Link>
+        }
+        collapsible
+      >
+        {flavorEngagementError ? (
+          <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            Unable to load humor flavor engagement right now.
+          </p>
+        ) : null}
+
+        <div className="grid gap-3 md:grid-cols-3">
+          <article className="rounded-[1.25rem] border border-[var(--border)] bg-[color:var(--panel-strong)] p-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              Top flavor
+            </p>
+            <p className="mt-3 truncate text-2xl font-semibold tracking-[-0.03em] text-slate-900 dark:text-slate-100">
+              {topFlavor?.slug ?? "-"}
+            </p>
+          </article>
+          <article className="rounded-[1.25rem] border border-[var(--border)] bg-[color:var(--panel-strong)] p-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              Engagement score
+            </p>
+            <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-slate-900 dark:text-slate-100">
+              {topFlavor ? formatCount(topFlavor.engagementScore) : "-"}
+            </p>
+          </article>
+          <article className="rounded-[1.25rem] border border-[var(--border)] bg-[color:var(--panel-strong)] p-4">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              Positive vote rate
+            </p>
+            <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-slate-900 dark:text-slate-100">
+              {formatPercent(topFlavor?.positiveVoteRate ?? null)}
+            </p>
+          </article>
+        </div>
+
+        <p className="mt-4 rounded-[1.25rem] border border-[var(--border)] bg-[color:var(--panel-muted)] px-4 py-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          {flavorPerformanceNote} Captions connect to humor flavors through humor_flavor_id, and user reactions come from caption_likes, caption_votes, and like_count.
+        </p>
+
+        <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[color:var(--panel-strong)]">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-[#f4ede3] dark:bg-[var(--panel-muted)]">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium text-slate-700">Flavor</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-700">Captions</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-700">Like count</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-700">Votes</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-700">Positive rate</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-700">Avg likes/caption</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-700">Score</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 bg-white">
+              {flavorEngagementRows.length > 0 ? (
+                flavorEngagementRows.map((row) => (
+                  <tr key={row.slug} className="transition hover:bg-[#fff8ef] dark:hover:bg-[var(--panel-muted)]">
+                    <td className="px-3 py-2 font-medium text-slate-800">{row.slug}</td>
+                    <td className="px-3 py-2 text-slate-700">{formatCount(row.captionCount)}</td>
+                    <td className="px-3 py-2 text-slate-700">{formatCount(row.totalLikeCount)}</td>
+                    <td className="px-3 py-2 text-slate-700">+{formatCount(row.positiveVoteCount)} / -{formatCount(row.negativeVoteCount)}</td>
+                    <td className="px-3 py-2 text-slate-700">{formatPercent(row.positiveVoteRate)}</td>
+                    <td className="px-3 py-2 text-slate-700">{row.averageLikeCount.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-slate-700">{formatCount(row.engagementScore)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-3 py-6 text-center text-slate-500" colSpan={7}>
+                    No flavor-linked caption engagement data yet.
                   </td>
                 </tr>
               )}
